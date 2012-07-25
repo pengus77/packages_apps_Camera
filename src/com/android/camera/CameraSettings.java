@@ -198,7 +198,6 @@ public class CameraSettings {
                 group.findPreference(KEY_VIDEOCAMERA_FLASH_MODE);
         ListPreference videoEffect = group.findPreference(KEY_VIDEO_EFFECT);
         ListPreference iso = group.findPreference(KEY_ISO);
-        ListPreference burstMode = group.findPreference(KEY_BURST_MODE);
         ListPreference jpeg = group.findPreference(KEY_JPEG);
         ListPreference storage = group.findPreference(KEY_STORAGE);
 
@@ -240,8 +239,15 @@ public class CameraSettings {
             initVideoEffect(group, videoEffect);
             resetIfInvalid(videoEffect);
         }
+
         if (storage != null) buildStorage(group, storage);
         if (burstMode != null) burstMode.setValueIndex(4);
+
+        if (iso != null) {
+            filterUnsupportedOptions(group,
+                    iso, mParameters.getSupportedIsoValues());
+        }
+
         qcomInitPreferences(group);
     }
 

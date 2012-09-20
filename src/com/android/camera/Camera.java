@@ -87,6 +87,23 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         ShutterButton.OnShutterButtonListener {
 
     private static final String TAG = "camera";
+
+    private final String[] OTHER_SETTING_KEYS = {
+                CameraSettings.KEY_RECORD_LOCATION,
+                CameraSettings.KEY_POWER_SHUTTER,
+                CameraSettings.KEY_PICTURE_SIZE,
+                CameraSettings.KEY_FOCUS_MODE,
+                CameraSettings.KEY_FOCUS_TIME,
+                CameraSettings.KEY_COLOR_EFFECT,
+                CameraSettings.KEY_ISO,
+                CameraSettings.KEY_TIMER_MODE,
+                CameraSettings.KEY_BURST_MODE,
+                CameraSettings.KEY_JPEG,
+                CameraSettings.KEY_ANTIBANDING,
+                CameraSettings.KEY_REDEYE_REDUCTION,
+                CameraSettings.KEY_AUTOEXPOSURE
+        };
+
     private boolean mRestartPreview = false;
     private boolean mAspectRatioChanged = false;
     private int mSnapshotMode;
@@ -1442,21 +1459,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_WHITE_BALANCE,
                 CameraSettings.KEY_EXPOSURE,
                 CameraSettings.KEY_SCENE_MODE};
-
-        final String[] OTHER_SETTING_KEYS = {
-                CameraSettings.KEY_STORAGE,
-                CameraSettings.KEY_RECORD_LOCATION,
-                CameraSettings.KEY_POWER_SHUTTER,
-                CameraSettings.KEY_PICTURE_SIZE,
-                CameraSettings.KEY_FOCUS_MODE,
-                CameraSettings.KEY_BURST_MODE,
-                CameraSettings.KEY_JPEG,
-                CameraSettings.KEY_FOCUS_TIME,
-                CameraSettings.KEY_COLOR_EFFECT,
-                CameraSettings.KEY_ISO,
-                CameraSettings.KEY_REDEYE_REDUCTION,
-                CameraSettings.KEY_AUTOEXPOSURE,
-                CameraSettings.KEY_ANTIBANDING};
 
         CameraPicker.setImageResourceId(R.drawable.ic_switch_photo_facing_holo_light);
         mIndicatorControlContainer.initialize(this, mPreferenceGroup,

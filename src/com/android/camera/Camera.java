@@ -89,6 +89,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     private static final String TAG = "camera";
 
     private final String[] OTHER_SETTING_KEYS = {
+				CameraSettings.KEY_STORAGE,
                 CameraSettings.KEY_RECORD_LOCATION,
                 CameraSettings.KEY_POWER_SHUTTER,
                 CameraSettings.KEY_PICTURE_SIZE,

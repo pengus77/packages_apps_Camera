@@ -87,6 +87,23 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         ShutterButton.OnShutterButtonListener {
 
     private static final String TAG = "camera";
+
+    private final String[] OTHER_SETTING_KEYS = {
+                CameraSettings.KEY_RECORD_LOCATION,
+                CameraSettings.KEY_POWER_SHUTTER,
+                CameraSettings.KEY_PICTURE_SIZE,
+                CameraSettings.KEY_FOCUS_MODE,
+                CameraSettings.KEY_FOCUS_TIME,
+                CameraSettings.KEY_COLOR_EFFECT,
+                CameraSettings.KEY_ISO,
+                CameraSettings.KEY_TIMER_MODE,
+                CameraSettings.KEY_BURST_MODE,
+                CameraSettings.KEY_JPEG,
+                CameraSettings.KEY_ANTIBANDING,
+                CameraSettings.KEY_REDEYE_REDUCTION,
+                CameraSettings.KEY_AUTOEXPOSURE
+        };
+
     private boolean mRestartPreview = false;
     private boolean mAspectRatioChanged = false;
     private int mSnapshotMode;
@@ -569,7 +586,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         queue.addIdleHandler(new MessageQueue.IdleHandler() {
             @Override
             public boolean queueIdle() {
-                Storage.ensureOSXCompatible(Storage.mStorage);
+                Storage.ensureOSXCompatible();
                 return false;
             }
         });
@@ -796,8 +813,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         if (mTimerIndicator == null) {
             return;
         }
-        String offTimer = getResources().getString(R.string.pref_camera_timer_entry_0);
-        if (offTimer.equals(mCaptureMode)) {
+        if (mCaptureMode == 0) {
             mTimerIndicator.setVisibility(View.GONE);
         } else {
             mTimerIndicator.setImageResource(R.drawable.ic_indicators_timer);
@@ -1150,7 +1166,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         private void storeImage(final byte[] data, Uri uri, String title,
                 Location loc, int width, int height, int thumbnailWidth,
                 int orientation) {
-            boolean ok = Storage.updateImage(mContentResolver, Storage.mStorage, uri, title, loc,
+            boolean ok = Storage.updateImage(mContentResolver, uri, title, loc,
                     orientation, data, width, height);
             if (ok) {
                 boolean needThumbnail;
@@ -1262,7 +1278,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         // Runs in namer thread
         private void generateUri() {
             mTitle = Util.createJpegName(mDateTaken);
-            mUri = Storage.newImage(mResolver, Storage.mStorage, mTitle, mDateTaken, mWidth, mHeight);
+            mUri = Storage.newImage(mResolver, mTitle, mDateTaken, mWidth, mHeight);
         }
 
         // Runs in namer thread
@@ -1317,10 +1333,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mImageNamer.prepareUri(mContentResolver, mCaptureStartTime,
                 size.width, size.height, mJpegRotation);
 
-        if (!mIsImageCaptureIntent) {
-            // Start capture animation.
-            mCameraScreenNail.animateCapture(getCameraRotation());
-        }
         mFaceDetectionStarted = false;
         setCameraState(SNAPSHOT_IN_PROGRESS);
         return true;
@@ -1394,8 +1406,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         initOnScreenIndicator();
         // Make sure all views are disabled before camera is open.
         enableCameraControls(false);
-        Storage.mStorage = CameraSettings.readStorage(mPreferences);
-        createCameraScreenNail(!mIsImageCaptureIntent);
     }
 
     private void overrideCameraSettings(final String flashMode,
@@ -1443,21 +1453,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 CameraSettings.KEY_WHITE_BALANCE,
                 CameraSettings.KEY_EXPOSURE,
                 CameraSettings.KEY_SCENE_MODE};
-
-        final String[] OTHER_SETTING_KEYS = {
-                CameraSettings.KEY_STORAGE,
-                CameraSettings.KEY_RECORD_LOCATION,
-                CameraSettings.KEY_POWER_SHUTTER,
-                CameraSettings.KEY_PICTURE_SIZE,
-                CameraSettings.KEY_FOCUS_MODE,
-                CameraSettings.KEY_BURST_MODE,
-                CameraSettings.KEY_JPEG,
-                CameraSettings.KEY_FOCUS_TIME,
-                CameraSettings.KEY_COLOR_EFFECT,
-                CameraSettings.KEY_ISO,
-                CameraSettings.KEY_REDEYE_REDUCTION,
-                CameraSettings.KEY_AUTOEXPOSURE,
-                CameraSettings.KEY_ANTIBANDING};
 
         CameraPicker.setImageResourceId(R.drawable.ic_switch_photo_facing_holo_light);
         mIndicatorControlContainer.initialize(this, mPreferenceGroup,
@@ -1545,7 +1540,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     }
 
     private void checkStorage() {
-        mStorageSpace = Storage.getAvailableSpace(Storage.mStorage);
+        mStorageSpace = Storage.getAvailableSpace();
         updateStorageHint(mStorageSpace);
     }
 
@@ -1700,12 +1695,12 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         int nbBurstShots = Integer.valueOf(mPreferences.getString(CameraSettings.KEY_BURST_MODE, "1"));
 
         if (!mTimerMode) {
-            if (!mCaptureMode.equals(getResources().getString(R.string.pref_camera_timer_entry_0))) {
+            if (mCaptureMode != 0) {
                 mTimerMode = true;
                 mShutterButton.setImageDrawable(getResources().getDrawable(
                         R.drawable.btn_video_shutter_recording_holo));
                 mRecordingTimeView.setVisibility(View.VISIBLE);
-                updateTimer(Integer.valueOf(mPreferences.getString(CameraSettings.KEY_TIMER_MODE, "10")));
+                updateTimer(mCaptureMode);
                 return;
             }
         } else if (mTimerMode) {
@@ -2336,9 +2331,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             // Set focus mode.
             mFocusManager.overrideFocusMode(null);
             mParameters.setFocusMode(mFocusManager.getFocusMode());
-            // Set capture mode.
-            mCaptureMode = mPreferences.getString(CameraSettings.KEY_TIMER_MODE, getString(R.string.pref_camera_timer_entry_0));
-
 
             // Set FOCUS time.
             String defaultFocusTime = getResources().getString(R.string.pref_camera_focus_default);
@@ -2348,8 +2340,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             // Set capture mode.
             String defaultTime = getResources().getString(R.string.pref_camera_timer_default);
             String delayTime = mPreferences.getString(CameraSettings.KEY_TIMER_MODE, defaultTime);
-            //mCaptureMode = Integer.valueOf(delayTime);
-			mCaptureMode = delayTime;
+            mCaptureMode = Integer.valueOf(delayTime);
         } else {
             mFocusManager.overrideFocusMode(mParameters.getFocusMode());
         }
@@ -2519,13 +2510,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 mPreferences, mContentResolver);
         mLocationManager.recordLocation(recordLocation);
 
-        String storage = CameraSettings.readStorage(mPreferences);
-        if (!storage.equals(Storage.mStorage)) {
-            Storage.mStorage = storage;
-            createCameraScreenNail(!mIsImageCaptureIntent);
-            checkStorage();
-        }
-
         setCameraParametersWhenIdle(UPDATE_PARAM_PREFERENCE);
         setPreviewFrameLayoutAspectRatio();
         updateOnScreenIndicators();
@@ -2643,9 +2627,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             mIndicatorControlContainer.dismissSettingPopup();
             CameraSettings.restorePreferences(Camera.this, mPreferences,
                     mParameters);
-            try {
-                mIndicatorControlContainer.reloadPreferences();
-            }catch(Exception ex){}
+            mIndicatorControlContainer.reloadPreferences();
             onSharedPreferenceChanged();
         }
     }

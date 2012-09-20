@@ -57,8 +57,6 @@
     <string name="pref_camera_focusmode_entry_fixed">Фиксированно</string>
     <string name="pref_camera_focusmode_entry_facedetect">Опред. лица</string>
     <string name="pref_camera_focusmode_entry_continuouspicture">Непрерывн. фокус</string>
-    <string name="pref_camera_iso_entry_auto">Авто</string>
-    <string name="pref_camera_iso_entry_isodeblur">Авто (HJR)</string>
     <string name="pref_camera_flashmode_title" msgid="2287362477238791017">"Режим вспышки"</string>
     <string name="pref_camera_flashmode_entry_auto" msgid="7288383434237457709">"Авто"</string>
     <string name="pref_camera_flashmode_entry_on" msgid="5330043918845197616">"Вкл."</string>

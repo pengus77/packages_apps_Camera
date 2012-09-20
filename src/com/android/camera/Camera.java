@@ -796,8 +796,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         if (mTimerIndicator == null) {
             return;
         }
-        String offTimer = getResources().getString(R.string.pref_camera_timer_entry_0);
-        if (offTimer.equals(mCaptureMode)) {
+        if (mCaptureMode == 0) {
             mTimerIndicator.setVisibility(View.GONE);
         } else {
             mTimerIndicator.setImageResource(R.drawable.ic_indicators_timer);
@@ -1700,12 +1699,12 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         int nbBurstShots = Integer.valueOf(mPreferences.getString(CameraSettings.KEY_BURST_MODE, "1"));
 
         if (!mTimerMode) {
-            if (!mCaptureMode.equals(getResources().getString(R.string.pref_camera_timer_entry_0))) {
+            if (mCaptureMode != 0) {
                 mTimerMode = true;
                 mShutterButton.setImageDrawable(getResources().getDrawable(
                         R.drawable.btn_video_shutter_recording_holo));
                 mRecordingTimeView.setVisibility(View.VISIBLE);
-                updateTimer(Integer.valueOf(mPreferences.getString(CameraSettings.KEY_TIMER_MODE, "10")));
+                updateTimer(mCaptureMode);
                 return;
             }
         } else if (mTimerMode) {
@@ -2336,9 +2335,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             // Set focus mode.
             mFocusManager.overrideFocusMode(null);
             mParameters.setFocusMode(mFocusManager.getFocusMode());
-            // Set capture mode.
-            mCaptureMode = mPreferences.getString(CameraSettings.KEY_TIMER_MODE, getString(R.string.pref_camera_timer_entry_0));
-
 
             // Set FOCUS time.
             String defaultFocusTime = getResources().getString(R.string.pref_camera_focus_default);
@@ -2348,8 +2344,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
             // Set capture mode.
             String defaultTime = getResources().getString(R.string.pref_camera_timer_default);
             String delayTime = mPreferences.getString(CameraSettings.KEY_TIMER_MODE, defaultTime);
-            //mCaptureMode = Integer.valueOf(delayTime);
-			mCaptureMode = delayTime;
+            mCaptureMode = Integer.valueOf(delayTime);
         } else {
             mFocusManager.overrideFocusMode(mParameters.getFocusMode());
         }

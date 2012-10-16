@@ -1334,10 +1334,6 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mImageNamer.prepareUri(mContentResolver, mCaptureStartTime,
                 size.width, size.height, mJpegRotation);
 
-        if (!mIsImageCaptureIntent) {
-            // Start capture animation.
-            mCameraScreenNail.animateCapture(getCameraRotation());
-        }
         mFaceDetectionStarted = false;
         setCameraState(SNAPSHOT_IN_PROGRESS);
         return true;

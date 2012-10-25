@@ -1408,7 +1408,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         // Make sure all views are disabled before camera is open.
         enableCameraControls(false);
         Storage.mStorage = CameraSettings.readStorage(mPreferences);
-        createCameraScreenNail(!mIsImageCaptureIntent);
+       // createCameraScreenNail(!mIsImageCaptureIntent);
     }
 
     private void overrideCameraSettings(final String flashMode,

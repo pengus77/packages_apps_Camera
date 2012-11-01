@@ -1372,6 +1372,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         mCameraId = getPreferredCameraId(mPreferences);
         mContentResolver = getContentResolver();
         powerShutter(mPreferences);
+	Storage.mStorage = CameraSettings.readStorage(mPreferences);
         // To reduce startup time, open the camera and start the preview in
         // another thread.
         mCameraStartUpThread = new CameraStartUpThread();
@@ -1386,29 +1387,30 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
 
         mRecordingTimeView = (TextView) findViewById(R.id.recording_time);
         mRecordingTimeRect = (RotateLayout) findViewById(R.id.recording_time_rect);
-        mRotateDialog = new RotateDialogController(this, R.layout.rotate_dialog);
-
-        mPreferences.setLocalId(this, mCameraId);
+	mPreferences.setLocalId(this, mCameraId);
         CameraSettings.upgradeLocalPreferences(mPreferences.getLocal());
         mFocusAreaIndicator = (RotateLayout) findViewById(
                 R.id.focus_indicator_rotate_layout);
         // we need to reset exposure for the preview
         resetExposureCompensation();
-        // Starting the preview needs preferences, camera screen nail, and
-        // focus area indicator.
-        mStartPreviewPrerequisiteReady.open();
-
-        initializeControlByIntent();
-        mRotateDialog = new RotateDialogController(this, R.layout.rotate_dialog);
-        mNumberOfCameras = CameraHolder.instance().getNumberOfCameras();
-        mQuickCapture = getIntent().getBooleanExtra(EXTRA_QUICK_CAPTURE, false);
-        initializeMiscControls();
-        mLocationManager = new LocationManager(this, this);
-        initOnScreenIndicator();
         // Make sure all views are disabled before camera is open.
         enableCameraControls(false);
-        Storage.mStorage = CameraSettings.readStorage(mPreferences);
-       // createCameraScreenNail(!mIsImageCaptureIntent);
+	Thread startPreviewThread = new Thread(new Runnable() {
+		@Override public void run() {
+			// Starting the preview needs preferences, camera screen nail, and
+			// focus area indicator.
+			mStartPreviewPrerequisiteReady.open();
+			initializeMiscControls();
+			initOnScreenIndicator();
+			startPreview();
+		}
+	});
+	startPreviewThread.start();
+	initializeControlByIntent();
+	mRotateDialog = new RotateDialogController(this, R.layout.rotate_dialog);
+	mNumberOfCameras = CameraHolder.instance().getNumberOfCameras();
+	mQuickCapture = getIntent().getBooleanExtra(EXTRA_QUICK_CAPTURE, false);
+	mLocationManager = new LocationManager(this, this);
     }
 
     private void overrideCameraSettings(final String flashMode,

@@ -1397,12 +1397,11 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         enableCameraControls(false);
 	Thread startPreviewThread = new Thread(new Runnable() {
 		@Override public void run() {
-			// Starting the preview needs preferences, camera screen nail, and
-			// focus area indicator.
-			mStartPreviewPrerequisiteReady.open();
 			initializeMiscControls();
 			initOnScreenIndicator();
-			startPreview();
+			// Starting the preview needs preferences, camera screennail, and
+			// focus area indicator.
+			mStartPreviewPrerequisiteReady.open();
 		}
 	});
 	startPreviewThread.start();

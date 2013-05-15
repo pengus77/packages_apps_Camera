@@ -2540,7 +2540,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         setCameraParametersWhenIdle(UPDATE_PARAM_PREFERENCE);
         setPreviewFrameLayoutAspectRatio();
         updateOnScreenIndicators();
-	initPowerShutter();
+	initPowerShutter(mPreferences);
     }
 
     @Override

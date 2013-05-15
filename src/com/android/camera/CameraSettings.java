@@ -241,7 +241,6 @@ public class CameraSettings {
         }
 
         if (storage != null) buildStorage(group, storage);
-        if (burstMode != null) burstMode.setValueIndex(4);
 
         if (iso != null) {
             filterUnsupportedOptions(group,

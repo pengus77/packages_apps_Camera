@@ -1371,7 +1371,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         CameraSettings.upgradeGlobalPreferences(mPreferences.getGlobal());
         mCameraId = getPreferredCameraId(mPreferences);
         mContentResolver = getContentResolver();
-        powerShutter(mPreferences);
+        initPowerShutter(mPreferences);
 	Storage.mStorage = CameraSettings.readStorage(mPreferences);
         // To reduce startup time, open the camera and start the preview in
         // another thread.
@@ -1992,6 +1992,12 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
     }
 
     @Override
+    protected void updateCameraAppView() {
+	super.updateCameraAppView();
+	initPowerShutter(mPreferences);
+    }
+
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (!mShowCameraAppView) {
             return super.onKeyDown(keyCode, event);
@@ -2025,7 +2031,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 }
                 return true;
             case KeyEvent.KEYCODE_POWER:
-                if (mFirstTimeInitialized && event.getRepeatCount() == 0 && powerShutter(mPreferences)) {
+                if (mFirstTimeInitialized && event.getRepeatCount() == 0 && mPowerShutter) {
                     onShutterButtonFocus(true);
                 }
                 return true;
@@ -2067,7 +2073,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
                 }
                 return true;
             case KeyEvent.KEYCODE_POWER:
-                if (powerShutter(mPreferences)) {
+                if (mPowerShutter) {
                     onShutterButtonClick();
                 }
                 return true;
@@ -2534,6 +2540,7 @@ public class Camera extends ActivityBase implements FocusManager.Listener,
         setCameraParametersWhenIdle(UPDATE_PARAM_PREFERENCE);
         setPreviewFrameLayoutAspectRatio();
         updateOnScreenIndicators();
+	initPowerShutter();
     }
 
     @Override

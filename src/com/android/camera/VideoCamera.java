@@ -1093,7 +1093,7 @@ public class VideoCamera extends ActivityBase
                 mShutterButton.setPressed(false);
                 return true;
             case KeyEvent.KEYCODE_POWER:
-                if (mPowerShutter)) {
+                if (mPowerShutter) {
                     onShutterButtonClick();
                 }
                 return true;

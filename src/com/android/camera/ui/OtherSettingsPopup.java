@@ -83,6 +83,7 @@ public class OtherSettingsPopup extends AbstractSettingPopup
                     mInflater.inflate(viewLayoutId, parent, false);
             if (viewLayoutId == R.layout.in_line_setting_restore) {
                 view.setId(R.id.restore_default);
+		return view;
             }
 
             view.initialize(pref); // no init for restore one
